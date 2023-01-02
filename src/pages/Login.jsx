@@ -1,11 +1,12 @@
-import styled from 'styled-components';
+import styled, { keyframes } from 'styled-components';
 import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Bg from 'components/Bg';
 
 export default function Login() {
   const navigate = useNavigate();
 
-  const idInput = useRef();
+  const emailRef = useRef();
 
   const moveRegisterPage = () => {
     navigate('/auth/register');
@@ -16,7 +17,7 @@ export default function Login() {
   };
 
   useEffect(() => {
-    idInput.current.focus();
+    emailRef.current.focus();
   }, []);
 
   return (
@@ -24,11 +25,18 @@ export default function Login() {
       <Container>
         <LoginForm onSubmit={submitForm}>
           <h2>Login</h2>
-          <label htmlFor='id'>ID</label>
-          <input ref={idInput} type='text' name='id' id='id' placeholder='아이디를 입력하세요.' />
+          <label htmlFor='email'>Email</label>
+          <input
+            required
+            ref={emailRef}
+            type='email'
+            name='email'
+            id='email'
+            placeholder='이메일을 입력하세요.'
+          />
 
           <label htmlFor='pw'>Password</label>
-          <input type='password' name='pw' id='pw' placeholder='비밀번호를 입력하세요.' />
+          <input required type='password' name='pw' id='pw' placeholder='비밀번호를 입력하세요.' />
           <button>Login</button>
 
           <Join>
@@ -43,12 +51,26 @@ export default function Login() {
   );
 }
 
-const Bg = styled.div`
-  width: 100%;
-  height: 100vh;
-  background: linear-gradient(to left, #ff9a9e, #fad0c4);
-  overflow: hidden;
-  position: relative;
+const fadeIn = keyframes`
+  0% {
+    opacity : 0;
+  }
+
+  25%{
+    opacity : 0.3;
+  }
+
+  50%{
+    opacity : 0.5;
+  }
+
+  75%{
+    opacity : 0.7;
+  }
+
+  100%{
+    opacity : 1;
+  }
 `;
 
 const Container = styled.div`
@@ -57,6 +79,7 @@ const Container = styled.div`
   justify-content: center;
   align-items: center;
   margin: 0 auto;
+  animation: ${fadeIn} 0.5s;
 
   &::before {
     content: '';
@@ -123,6 +146,7 @@ const LoginForm = styled.form`
     color: #ffffff;
     z-index: 5;
     transition: all 0.2s;
+    outline: none;
     cursor: pointer;
 
     &::before {
