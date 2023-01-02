@@ -1,0 +1,243 @@
+import styled, { keyframes } from 'styled-components';
+import { useNavigate } from 'react-router-dom';
+import { useEffect, useRef, useState } from 'react';
+
+import Bg from 'components/Bg';
+
+import { PRIMARY_COLOR, SECONDARY_COLOR, TEXT_COLOR, WHITE_COLOR } from 'colors/common';
+
+export default function SignUp() {
+  const navigate = useNavigate();
+
+  const [formInputs, setFormInputs] = useState({
+    email: '',
+    password: '',
+  });
+
+  const [isFormComplete, setIsFormComplete] = useState(false);
+
+  const emailRef = useRef();
+
+  useEffect(() => {
+    setTimeout(() => {
+      emailRef.current.focus();
+    }, 500);
+  }, []);
+
+  const moveLoginPage = () => {
+    navigate('/auth/login');
+  };
+
+  const submitHandler = (e) => {
+    e.preventDefault();
+
+    if (!isFormComplete) return window.alert('이메일 또는 비밀번호의 형식이 올바르지 않습니다.');
+  };
+
+  const emailInput = ({ target }) => {
+    setFormInputs((prev) => ({
+      ...prev,
+      email: target.value,
+    }));
+  };
+
+  const passwordInput = ({ target }) => {
+    setFormInputs((prev) => ({
+      ...prev,
+      password: target.value,
+    }));
+  };
+
+  const EMAIL_REGEXP = new RegExp('^[a-zA-Z0-9]+@[a-zA-Z0-9]+\\.[a-zA-Z0-9]+$');
+
+  useEffect(() => {
+    if (formInputs.password.length >= 8 && EMAIL_REGEXP.test(formInputs.email)) {
+      setIsFormComplete(true);
+    } else {
+      setIsFormComplete(false);
+    }
+  }, [formInputs]);
+
+  console.log(isFormComplete);
+
+  return (
+    <Bg>
+      <Container>
+        <SignUpForm onSubmit={submitHandler}>
+          <h2>Sign Up</h2>
+          <label htmlFor='email'>Email</label>
+          <input
+            onChange={emailInput}
+            ref={emailRef}
+            type='email'
+            name='email'
+            id='email'
+            required
+            placeholder='사용할 이메일을 입력해주세요.'
+          />
+
+          <label htmlFor='pw'>Password</label>
+          <input
+            onChange={passwordInput}
+            required
+            type='password'
+            name='pw'
+            id='pw'
+            placeholder='사용할 비밀번호를 입력해주세요.'
+          />
+
+          <button>Sign Up</button>
+
+          <Login>
+            이미 회원가입하셨나요?
+            <span role='button' onClick={moveLoginPage}>
+              로그인
+            </span>
+          </Login>
+        </SignUpForm>
+      </Container>
+    </Bg>
+  );
+}
+
+const fadeIn = keyframes`
+  0% {
+    opacity : 0;
+  }
+
+  25%{
+    opacity : 0.3;
+  }
+
+  50%{
+    opacity : 0.5;
+  }
+
+  75%{
+    opacity : 0.7;
+  }
+
+  100%{
+    opacity : 1;
+  }
+`;
+
+const Container = styled.div`
+  display: flex;
+  width: 100%;
+  height: 90vh;
+  justify-content: center;
+  align-items: center;
+
+  animation: ${fadeIn} 0.5s;
+`;
+
+const SignUpForm = styled.form`
+  width: 500px;
+  height: 90vh;
+  display: flex;
+  background: ${WHITE_COLOR};
+
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  position: relative;
+
+  width: 500px;
+  height: 400px;
+
+  background: #fff;
+  box-shadow: 2px 2px 20px #e37a7a5c;
+  padding: 50px;
+  padding-top: 45px;
+  border-radius: 20px;
+
+  > h2 {
+    color: ${TEXT_COLOR};
+  }
+
+  > label {
+    margin-top: 15px;
+    font-size: 12px;
+    color: ${TEXT_COLOR};
+  }
+
+  > input {
+    border: none;
+    padding: 5px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #ad979850;
+
+    &:focus {
+      outline: none;
+    }
+
+    &::placeholder {
+      color: #b3adad;
+      font-size: 12px;
+    }
+  }
+
+  > button {
+    width: 100%;
+    margin-top: 22px;
+    padding: 10px;
+    border-radius: 50px;
+    border: none;
+    background: linear-gradient(to left, ${PRIMARY_COLOR}, ${SECONDARY_COLOR});
+    position: relative;
+    color: #ffffff;
+    z-index: 5;
+    transition: all 0.2s;
+    outline: none;
+    cursor: pointer;
+
+    &::before {
+      content: '';
+      background: none;
+      width: 50%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      background: none;
+      box-shadow: 0px 15px 20px #ffb8b85c;
+      border-radius: 50px;
+      position: absolute;
+    }
+
+    &::after {
+      content: '';
+      background: none;
+      width: 50%;
+      height: 100%;
+      top: 0;
+      right: 0;
+      background: none;
+      border-radius: 50px;
+      box-shadow: 0px 15px 30px #ffa9c15c;
+      position: absolute;
+    }
+
+    &:hover {
+      box-shadow: #d8949740 0px -8px 5px inset, #ffa4a950 0px 5px 5px;
+    }
+  }
+`;
+
+const Login = styled.div`
+  color: #746e6e;
+  font-size: 13px;
+  position: absolute;
+  bottom: 35px;
+  right: 50px;
+
+  > span {
+    margin-left: 8px;
+    color: #f0878a;
+    cursor: pointer;
+
+    &:hover {
+      background: #f2b0b330;
+    }
+  }
+`;
