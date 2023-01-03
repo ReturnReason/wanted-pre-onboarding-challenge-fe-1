@@ -1,10 +1,19 @@
 import styled, { keyframes } from 'styled-components';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+
 import Bg from 'components/Bg';
+
+import { useLoginMutation } from 'api/apiSlice';
 
 export default function Login() {
   const navigate = useNavigate();
+
+  const [login] = useLoginMutation();
+  const [loginInfos, setLoginInfos] = useState({
+    email: '',
+    password: '',
+  });
 
   const emailRef = useRef();
 
@@ -12,18 +21,59 @@ export default function Login() {
     navigate('/auth/register');
   };
 
-  const submitForm = (e) => {
+  useEffect(() => {
+    if (localStorage.getItem('token')) {
+      window.alert('이미 로그인되어있습니다.');
+      return navigate('/');
+    }
+  }, []);
+
+  const submitHandler = async (e) => {
     e.preventDefault();
+
+    try {
+      const payload = await login(loginInfos).unwrap();
+
+      if (localStorage.getItem('token')) {
+        return navigate('/');
+      }
+
+      if (payload.token) {
+        localStorage.setItem('token', payload.token);
+        window.alert(payload.message);
+        navigate('/todos');
+      }
+    } catch (error) {
+      console.error(error);
+
+      window.alert(error.data.details);
+    }
   };
 
   useEffect(() => {
     emailRef.current.focus();
   }, []);
 
+  const changeEmailInput = ({ target }) => {
+    setLoginInfos((prev) => ({
+      ...prev,
+      email: target.value,
+    }));
+  };
+
+  const changePwInput = ({ target }) => {
+    setLoginInfos((prev) => ({
+      ...prev,
+      password: target.value,
+    }));
+  };
+
+  console.log(loginInfos);
+
   return (
     <Bg>
       <Container>
-        <LoginForm onSubmit={submitForm}>
+        <LoginForm onSubmit={submitHandler}>
           <h2>Login</h2>
           <label htmlFor='email'>Email</label>
           <input
@@ -33,10 +83,18 @@ export default function Login() {
             name='email'
             id='email'
             placeholder='이메일을 입력하세요.'
+            onChange={changeEmailInput}
           />
 
           <label htmlFor='pw'>Password</label>
-          <input required type='password' name='pw' id='pw' placeholder='비밀번호를 입력하세요.' />
+          <input
+            onChange={changePwInput}
+            required
+            type='password'
+            name='pw'
+            id='pw'
+            placeholder='비밀번호를 입력하세요.'
+          />
           <button>Login</button>
 
           <Join>
