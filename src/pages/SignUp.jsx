@@ -5,14 +5,22 @@ import { useEffect, useRef, useState } from 'react';
 import Bg from 'components/Bg';
 
 import { PRIMARY_COLOR, SECONDARY_COLOR, TEXT_COLOR, WHITE_COLOR } from 'colors/common';
+import { useCreateUserMutation } from 'api/apiSlice';
+
+const EMAIL_REGEXP = new RegExp('^[a-zA-Z0-9]+@[a-zA-Z]+[.]{1}[A-Za-z]{2,3}$');
 
 export default function SignUp() {
+  const [createUser] = useCreateUserMutation();
+
   const navigate = useNavigate();
 
   const [formInputs, setFormInputs] = useState({
     email: '',
     password: '',
   });
+
+  const [emailValidCheckMessage, setEmailValidCheckMessage] = useState('');
+  const [pwValidCheckMessage, setPwValidCheckMessage] = useState('');
 
   const [isFormComplete, setIsFormComplete] = useState(false);
 
@@ -28,10 +36,32 @@ export default function SignUp() {
     navigate('/auth/login');
   };
 
-  const submitHandler = (e) => {
+  const submitHandler = async (e) => {
     e.preventDefault();
 
-    if (!isFormComplete) return window.alert('이메일 또는 비밀번호의 형식이 올바르지 않습니다.');
+    if (!isFormComplete) {
+      return window.alert('이메일 또는 비밀번호의 형식이 올바르지 않습니다.');
+    }
+
+    try {
+      const payload = await createUser(formInputs).unwrap();
+      localStorage.setItem('token', payload.token);
+
+      if (payload.message === '계정이 성공적으로 생성되었습니다') {
+        window.alert('회원가입 완료! 로그인 페이지로 이동합니다.');
+        navigate('/auth/login');
+      }
+    } catch (error) {
+      console.error(error);
+
+      if (error.status === 400) {
+        window.alert(error.data.details);
+      }
+
+      if (error.status === 409) {
+        window.alert('이미 존재하는 이메일입니다.');
+      }
+    }
   };
 
   const emailInput = ({ target }) => {
@@ -41,6 +71,13 @@ export default function SignUp() {
     }));
   };
 
+  useEffect(() => {
+    if (!EMAIL_REGEXP.test(formInputs.email)) {
+      return setEmailValidCheckMessage('이메일의 형식이 올바르지 않습니다.');
+    }
+    setEmailValidCheckMessage('올바른 이메일 형식입니다.');
+  }, [formInputs.email]);
+
   const passwordInput = ({ target }) => {
     setFormInputs((prev) => ({
       ...prev,
@@ -48,17 +85,19 @@ export default function SignUp() {
     }));
   };
 
-  const EMAIL_REGEXP = new RegExp('^[a-zA-Z0-9]+@[a-zA-Z0-9]+\\.[a-zA-Z0-9]+$');
+  useEffect(() => {
+    if (formInputs.password.length < 8) {
+      return setPwValidCheckMessage('비밀번호는 8자 이상 입력해야 합니다.');
+    }
+    setPwValidCheckMessage('사용 가능한 비밀번호입니다.');
+  }, [formInputs.password]);
 
   useEffect(() => {
     if (formInputs.password.length >= 8 && EMAIL_REGEXP.test(formInputs.email)) {
-      setIsFormComplete(true);
-    } else {
-      setIsFormComplete(false);
+      return setIsFormComplete(true);
     }
+    setIsFormComplete(false);
   }, [formInputs]);
-
-  console.log(isFormComplete);
 
   return (
     <Bg>
@@ -66,6 +105,7 @@ export default function SignUp() {
         <SignUpForm onSubmit={submitHandler}>
           <h2>Sign Up</h2>
           <label htmlFor='email'>Email</label>
+          {<ValidCheckEmailMessage>{emailValidCheckMessage}</ValidCheckEmailMessage>}
           <input
             onChange={emailInput}
             ref={emailRef}
@@ -77,6 +117,7 @@ export default function SignUp() {
           />
 
           <label htmlFor='pw'>Password</label>
+          {<ValidCheckPwMessage>{pwValidCheckMessage}</ValidCheckPwMessage>}
           <input
             onChange={passwordInput}
             required
@@ -224,11 +265,47 @@ const SignUpForm = styled.form`
   }
 `;
 
+const ValidCheckEmailMessage = styled.span`
+  font-size: 12px;
+  color: #746e6e;
+  position: absolute;
+  top: 130px;
+  left: 100px;
+
+  &:before {
+    content: '';
+    display: block;
+    width: 100%;
+    height: 50%;
+    background: #fec1c130;
+    position: absolute;
+    bottom: -2px;
+  }
+`;
+
+const ValidCheckPwMessage = styled.span`
+  font-size: 12px;
+  color: #746e6e;
+  position: absolute;
+  bottom: 187px;
+  left: 130px;
+
+  &:before {
+    content: '';
+    display: block;
+    width: 100%;
+    height: 50%;
+    background: #fec1c130;
+    position: absolute;
+    bottom: -2px;
+  }
+`;
+
 const Login = styled.div`
   color: #746e6e;
   font-size: 13px;
   position: absolute;
-  bottom: 35px;
+  bottom: 38px;
   right: 50px;
 
   > span {
