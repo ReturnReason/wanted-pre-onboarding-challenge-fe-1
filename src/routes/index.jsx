@@ -1,5 +1,5 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { Home, Login, SignUp } from 'pages/index';
+import { Home, Login, SignUp, Todo } from 'pages/index';
 
 export default function index() {
   return (
@@ -10,6 +10,7 @@ export default function index() {
         <Route path='login' element={<Login />} />
         <Route path='register' element={<SignUp />} />
       </Route>
+      <Route path='/todos' element={<Todo />} />
     </Routes>
   );
 }
