@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 
 import Bg from 'components/Bg';
 
-import { useLoginMutation } from 'api/apiSlice';
+import { useLoginMutation } from 'api/userApi';
 
 export default function Login() {
   const navigate = useNavigate();

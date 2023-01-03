@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 import Bg from 'components/Bg';
 
 import { PRIMARY_COLOR, SECONDARY_COLOR, TEXT_COLOR, WHITE_COLOR } from 'colors/common';
-import { useCreateUserMutation } from 'api/apiSlice';
+import { useCreateUserMutation } from 'api/userApi';
 
 const EMAIL_REGEXP = new RegExp('^[a-zA-Z0-9]+@[a-zA-Z]+[.]{1}[A-Za-z]{2,3}$');
 
@@ -18,10 +18,8 @@ export default function SignUp() {
     email: '',
     password: '',
   });
-
   const [emailValidCheckMessage, setEmailValidCheckMessage] = useState('');
   const [pwValidCheckMessage, setPwValidCheckMessage] = useState('');
-
   const [isFormComplete, setIsFormComplete] = useState(false);
 
   const emailRef = useRef();
