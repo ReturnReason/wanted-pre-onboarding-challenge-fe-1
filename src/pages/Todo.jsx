@@ -18,6 +18,13 @@ import Modal from 'components/Modal';
 // TODO: 히스토리
 
 export default function Todo() {
+  useEffect(() => {
+    if (!localStorage.getItem('token')) {
+      window.alert('로그인 후 이용하실 수 있습니다.');
+      navigate('/auth/login');
+    }
+  });
+
   const modalRef = useRef(null);
   const modificationTodoRef = useRef(null);
   const param = useParams();
@@ -36,12 +43,10 @@ export default function Todo() {
   const [deleteTodoMutation] = useDeleteTodoMutation();
   const [updateTodoMutation] = useUpdateTodoMutation();
 
-  const { data: todos, isLoading, isSuccess, isFetching } = useGetTodosQuery();
+  const { data: todos, isLoading, isSuccess } = useGetTodosQuery();
 
   const option = { skip: !selectedTodo };
   const { data: selectTodo } = useGetTodoByIdQuery(selectedTodo, option);
-
-  console.log(selectTodo);
 
   const addTodoHandler = () => {
     modalRef.current?.showModal();
@@ -155,6 +160,12 @@ export default function Todo() {
     }
   };
 
+  const logoutHanlder = () => {
+    localStorage.removeItem('token');
+    window.alert('로그아웃되었습니다.');
+    navigate('/');
+  };
+
   return (
     <>
       {
@@ -174,6 +185,9 @@ export default function Todo() {
       <Bg>
         <Conatiner>
           <div>
+            <Logout>
+              <Button onClick={logoutHanlder}>로그아웃</Button>
+            </Logout>
             <h2>To do List</h2>
             {isLoading && <div>로딩중</div>}
             <TodoContainer>
@@ -398,4 +412,10 @@ const TodoButton = styled.button`
   border-radius: 5px;
   padding: 5px;
   margin-right: 8px;
+`;
+
+const Logout = styled.div`
+  position: absolute;
+  right: 15px;
+  top: 10px;
 `;
