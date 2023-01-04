@@ -13,26 +13,19 @@ import {
 import { WHITE_COLOR, TEXT_COLOR, PRIMARY_COLOR, SECONDARY_COLOR } from 'colors/common';
 import Bg from 'components/Bg';
 import Button from 'components/Button';
-import Input from 'components/Input';
 import Modal from 'components/Modal';
 
 // TODO: 히스토리
-// TODO : 삭제, 수정 버그 고치기
 
 export default function Todo() {
   const modalRef = useRef(null);
+  const modificationTodoRef = useRef(null);
   const param = useParams();
 
   const [mode, setMode] = useState('');
   const [allTodos, setAllTodos] = useState([]);
-  const [selectedTodo, setSelectedTodo] = useState(param?.id);
+  const [selectedTodo, setSelectedTodo] = useState();
   const [createTodoContent, setCreateTodoCotent] = useState({
-    title: '',
-    content: '',
-  });
-
-  const [modifyTodoContent, setModifyTodoContent] = useState({
-    id: '',
     title: '',
     content: '',
   });
@@ -47,6 +40,8 @@ export default function Todo() {
 
   const option = { skip: !selectedTodo };
   const { data: selectTodo } = useGetTodoByIdQuery(selectedTodo, option);
+
+  console.log(selectTodo);
 
   const addTodoHandler = () => {
     modalRef.current?.showModal();
@@ -95,30 +90,32 @@ export default function Todo() {
     (selectedTodo) =>
     ({ target }) => {
       if (target.id !== 'select') return;
-      // navigate(`/todos/${selectedTodo.id}`);
+      setSelectedTodo(selectedTodo);
       setMode('show');
     };
 
+  const [modifyTitle, setModifyTitle] = useState(selectTodo?.title);
+  const [modifyContent, setModifyContent] = useState(selectTodo?.content);
+
   const modifyMode =
-    (todo) =>
+    (selectedTodo) =>
     ({ target }) => {
       if (target.id !== 'modify') return;
 
+      setModifyTitle(selectedTodo?.data.title);
+      setModifyContent(selectedTodo?.data.content);
       setMode('modify');
-      setModifyTodoContent((prev) => {
-        return {
-          ...prev,
-          id: selectedTodo.id,
-          title: todo.data.title,
-          content: todo.data.content,
-        };
-      });
     };
 
   const cancleModifyTodo = () => {
     setMode('show');
-    setModifyTodoContent((prev) => ({ ...prev, title: '', content: '' }));
   };
+
+  useEffect(() => {
+    if (mode === 'modify') {
+      modificationTodoRef.current.focus();
+    }
+  }, [mode]);
 
   const deleteTodo = (todo) => async () => {
     try {
@@ -133,23 +130,28 @@ export default function Todo() {
   };
 
   const changeTitleInput = ({ target }) => {
-    setModifyTodoContent((prev) => {
-      return { ...prev, title: target.value };
-    });
+    setModifyTitle(target.value);
   };
 
   const changeContentInput = ({ target }) => {
-    setModifyTodoContent((prev) => {
-      return { ...prev, content: target.value };
-    });
+    setModifyContent(target.value);
   };
 
-  const requestModificationTodo = () => async () => {
+  const requestModificationTodo = (todo) => async () => {
     try {
-      const payload = updateTodoMutation(modifyTodoContent).unwrap();
-      console.log(payload);
+      console.log(modifyContent, modifyTitle, todo);
+      const payload = await updateTodoMutation({
+        id: todo.data.id,
+        title: modifyTitle,
+        content: modifyContent,
+      }).unwrap();
+
+      if (payload) {
+        setMode('show');
+      }
     } catch (error) {
       console.error(error);
+      window.alert('에러 발생! 잠시 후 다시 시도해주세요.');
     }
   };
 
@@ -168,6 +170,7 @@ export default function Todo() {
           </Modal>
         </form>
       }
+
       <Bg>
         <Conatiner>
           <div>
@@ -202,14 +205,25 @@ export default function Todo() {
 
                 {mode === 'modify' && (
                   <>
-                    <Input value={modifyTodoContent?.title} onChange={changeTitleInput} />
-                    <TextArea value={modifyTodoContent?.content} onChange={changeContentInput} />
-                    <TodoButton id='modify' onClick={requestModificationTodo(modifyTodoContent)}>
-                      확인
-                    </TodoButton>
-                    <TodoButton id='cancle' onClick={cancleModifyTodo}>
-                      취소
-                    </TodoButton>
+                    <ModifyInput
+                      ref={modificationTodoRef}
+                      placeholder='Title'
+                      value={modifyTitle}
+                      onChange={changeTitleInput}
+                    />
+                    <ModifyTextArea
+                      placeholder='Content'
+                      value={modifyContent}
+                      onChange={changeContentInput}
+                    />
+                    <ModifyButtonContainer>
+                      <TodoButton id='modify' onClick={requestModificationTodo(selectTodo)}>
+                        확인
+                      </TodoButton>
+                      <TodoButton id='cancle' onClick={cancleModifyTodo}>
+                        취소
+                      </TodoButton>
+                    </ModifyButtonContainer>
                   </>
                 )}
               </TodoDetail>
@@ -331,11 +345,40 @@ const TodoItem = styled.div`
 const TodoDetail = styled.div`
   max-height: 450px;
   flex: 1;
-  padding-left: 20px;
-  padding-right: 20px;
+  padding: 20px;
   border-radius: 10px;
   background: #fff6f6;
   color: #746e6e;
+`;
+
+const ModifyInput = styled.input`
+  width: 100%;
+  border: none;
+  padding: 10px;
+
+  &:focus {
+    outline: none;
+  }
+`;
+
+const ModifyTextArea = styled.textarea`
+  min-width: 100%;
+  max-width: 200px;
+  min-height: 80%;
+  max-height: 300px;
+  border: none;
+  margin-top: 15px;
+  margin-bottom: 10px;
+  padding: 10px;
+
+  &:focus {
+    outline: none;
+  }
+`;
+
+const ModifyButtonContainer = styled.div`
+  display: flex;
+  justify-content: center;
 `;
 
 const TextArea = styled.textarea`
