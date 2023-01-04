@@ -1,3 +1,7 @@
+import styled from 'styled-components';
+import { useEffect, useRef, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+
 import {
   useCreateTodoMutation,
   useGetTodosQuery,
@@ -5,26 +9,23 @@ import {
   useDeleteTodoMutation,
   useUpdateTodoMutation,
 } from 'api/todoApi';
+
 import { WHITE_COLOR, TEXT_COLOR, PRIMARY_COLOR, SECONDARY_COLOR } from 'colors/common';
 import Bg from 'components/Bg';
 import Button from 'components/Button';
 import Input from 'components/Input';
 import Modal from 'components/Modal';
-import { useEffect, useRef, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import styled from 'styled-components';
+
+// TODO: 히스토리
+// TODO : 삭제, 수정 버그 고치기
 
 export default function Todo() {
   const modalRef = useRef(null);
-
   const param = useParams();
 
-  const navigate = useNavigate();
-
-  const [selectedTodo, setSelectedTodo] = useState(null);
-  const options = { pollingInterval: 0, skip: !selectedTodo };
-  const { data: selectTodo } = useGetTodoByIdQuery(selectedTodo, options);
-
+  const [mode, setMode] = useState('');
+  const [allTodos, setAllTodos] = useState([]);
+  const [selectedTodo, setSelectedTodo] = useState(param?.id);
   const [createTodoContent, setCreateTodoCotent] = useState({
     title: '',
     content: '',
@@ -36,14 +37,16 @@ export default function Todo() {
     content: '',
   });
 
+  const navigate = useNavigate();
+
   const [createTodoMutation] = useCreateTodoMutation();
   const [deleteTodoMutation] = useDeleteTodoMutation();
   const [updateTodoMutation] = useUpdateTodoMutation();
-  const { data: todos, isLoading, isSuccess } = useGetTodosQuery();
 
-  const [mode, setMode] = useState('');
+  const { data: todos, isLoading, isSuccess, isFetching } = useGetTodosQuery();
 
-  const [allTodos, setAllTodos] = useState([]);
+  const option = { skip: !selectedTodo };
+  const { data: selectTodo } = useGetTodoByIdQuery(selectedTodo, option);
 
   const addTodoHandler = () => {
     modalRef.current?.showModal();
@@ -80,10 +83,11 @@ export default function Todo() {
   };
 
   useEffect(() => {
-    if (todos && isSuccess) {
+    if (isSuccess && todos) {
       const { data } = todos;
-      setAllTodos((prev) => [...prev, ...data]);
-      setAllTodos((prev) => [...new Set(prev)]);
+      setAllTodos(() => {
+        return [...data];
+      });
     }
   }, [todos]);
 
@@ -91,7 +95,7 @@ export default function Todo() {
     (selectedTodo) =>
     ({ target }) => {
       if (target.id !== 'select') return;
-      setSelectedTodo(selectedTodo);
+      // navigate(`/todos/${selectedTodo.id}`);
       setMode('show');
     };
 
@@ -118,7 +122,7 @@ export default function Todo() {
 
   const deleteTodo = (todo) => async () => {
     try {
-      const payload = await deleteTodoMutation(todo).unwrap();
+      const payload = await deleteTodoMutation({ id: todo.id }).unwrap();
       if (payload) {
         window.alert('삭제되었습니다.');
       }
