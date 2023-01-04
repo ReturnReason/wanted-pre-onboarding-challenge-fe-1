@@ -46,8 +46,8 @@ export default function SignUp() {
       localStorage.setItem('token', payload.token);
 
       if (payload.message === '계정이 성공적으로 생성되었습니다') {
-        window.alert('회원가입 완료! 로그인 페이지로 이동합니다.');
-        navigate('/auth/login');
+        window.alert('회원가입 완료! 메인 페이지로 이동합니다.');
+        navigate('/');
       }
     } catch (error) {
       console.error(error);
