@@ -10,7 +10,9 @@ export default function index() {
         <Route path='login' element={<Login />} />
         <Route path='register' element={<SignUp />} />
       </Route>
-      <Route path='/todos' element={<Todo />} />
+      <Route path='/todos' element={<Todo />}>
+        <Route path=':id' />
+      </Route>
     </Routes>
   );
 }
