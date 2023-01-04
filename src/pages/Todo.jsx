@@ -18,12 +18,14 @@ import Modal from 'components/Modal';
 // TODO: 히스토리
 
 export default function Todo() {
+  const navigate = useNavigate();
+
   useEffect(() => {
     if (!localStorage.getItem('token')) {
       window.alert('로그인 후 이용하실 수 있습니다.');
-      navigate('/auth/login');
+      return navigate('/auth/login');
     }
-  });
+  }, []);
 
   const modalRef = useRef(null);
   const modificationTodoRef = useRef(null);
@@ -36,8 +38,6 @@ export default function Todo() {
     title: '',
     content: '',
   });
-
-  const navigate = useNavigate();
 
   const [createTodoMutation] = useCreateTodoMutation();
   const [deleteTodoMutation] = useDeleteTodoMutation();
@@ -207,7 +207,7 @@ export default function Todo() {
                   })}
               </TodoItems>
               <TodoDetail>
-                {mode === 'show' && (
+                {mode === 'show' && selectTodo && (
                   <>
                     <h3>{selectTodo?.data?.title}</h3>
                     <p>{selectTodo?.data?.content}</p>
