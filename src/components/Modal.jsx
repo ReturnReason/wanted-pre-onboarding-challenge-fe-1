@@ -59,7 +59,6 @@ const Bg = styled.div`
 const Card = styled.div`
   background: ${WHITE_COLOR};
   width: 500px;
-  height: 250px;
   border-radius: 10px;
   z-index: 999;
   box-shadow: 5px 5px 50px #ff9a9e50;
@@ -70,18 +69,17 @@ const Card = styled.div`
   font-size: 18px;
   position: relative;
   overflow: hidden;
+  padding: 20px;
+  padding-top: 20px;
+  border: 2px dashed #ff9a9e90;
 
   &:after {
     content: '';
     background: ${PRIMARY_COLOR};
     width: 100%;
-    height: 15px;
+    height: 10px;
     position: absolute;
     top: 0;
-  }
-
-  div {
-    margin-top: 15px;
   }
 `;
 
