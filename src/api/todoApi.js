@@ -7,21 +7,17 @@ export const todoApi = createApi({
   endpoints: (builder) => ({
     getTodos: builder.query({
       providesTags: ['Todo'],
-      query() {
-        return {
-          url: '/',
-          headers: { Authorization: localStorage.getItem('token') },
-        };
-      },
+      query: () => ({
+        url: '/',
+        headers: { Authorization: localStorage.getItem('token') },
+      }),
     }),
     getTodoById: builder.query({
       providesTags: ['Todo'],
-      query({ id }) {
-        return {
-          url: `/${id}`,
-          headers: { Authorization: localStorage.getItem('token') },
-        };
-      },
+      query: ({ id }) => ({
+        url: `/${id}`,
+        headers: { Authorization: localStorage.getItem('token') },
+      }),
     }),
     createTodo: builder.mutation({
       invalidatesTags: ['Todo'],
@@ -36,8 +32,8 @@ export const todoApi = createApi({
     }),
     deleteTodo: builder.mutation({
       invalidatesTags: ['Todo'],
-      query: (todo) => ({
-        url: `/${todo.id}`,
+      query: ({ id }) => ({
+        url: `/${id}`,
         method: 'DELETE',
         headers: {
           Authorization: localStorage.getItem('token'),
@@ -52,7 +48,7 @@ export const todoApi = createApi({
         headers: {
           Authorization: localStorage.getItem('token'),
         },
-        body: todo,
+        body: { title: todo.title, content: todo.content },
       }),
     }),
   }),
