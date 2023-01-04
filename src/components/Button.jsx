@@ -1,10 +1,10 @@
 import { PRIMARY_COLOR, WHITE_COLOR } from 'colors/common';
 import styled, { css } from 'styled-components';
 
-export default function Button({ children, onClick, outline = false }) {
+export default function Button({ children, onClick, className, outline = false }) {
   return (
     <div>
-      <Btn onClick={onClick} outline={outline}>
+      <Btn onClick={onClick} outline={outline} className={className}>
         {children}
       </Btn>
     </div>
@@ -13,7 +13,6 @@ export default function Button({ children, onClick, outline = false }) {
 
 const Btn = styled.button`
   width: 100%;
-  margin-top: 22px;
   padding: 10px;
   border-radius: 50px;
   border: none;
